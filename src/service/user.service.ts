@@ -1,10 +1,11 @@
 
-import { userType } from "../dtos/users.dto.js";
+import { updateUserType, userType } from "../dtos/users.dto.js";
 import {
     createUser as createUserRepository,
     getUserByEmail as getUserByEmailRepository,
     getUserById as getUserByIdRepository,
-    deleteUser as deleteUserRepository
+    deleteUser as deleteUserRepository,
+    updateUser as updateUserRepository
 
 
 } from '../repository/user.repository.js'
@@ -57,5 +58,19 @@ export async function deleteUserService(id : number){
     const response = await deleteUserRepository(id);
 
     return response;
+
+}
+
+export async function updateUserService(id : number,data : updateUserType){
+
+    const user = await getUserByIdRepository(id);
+
+    if(!user){
+        throw notFound('user not found');
+    }
+
+    const updatedUser = await updateUserRepository(id,data);
+
+    return updatedUser;
 
 }

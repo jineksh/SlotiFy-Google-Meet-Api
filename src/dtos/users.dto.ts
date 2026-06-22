@@ -9,7 +9,15 @@ export const userSchema  = z.object({
 })
 
 
+export const updateUserSchema  = userSchema.partial();
+
+
+
+
+
 export type userType = z.infer<typeof userSchema>;
+export type updateUserType = z.infer<typeof updateUserSchema>;
+
 
 
 

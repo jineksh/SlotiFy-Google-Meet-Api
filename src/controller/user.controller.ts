@@ -1,5 +1,7 @@
 
-import { createUserService , getUserByIdService , getUserByEmailService, deleteUserService} from "../service/user.service.js";
+import { createUserService , getUserByIdService , getUserByEmailService, deleteUserService,
+updateUserService
+} from "../service/user.service.js";
 import {createSuccessResponse}  from "../utils/successResponse.js";
 import { Request,Response,NextFunction } from "express";
 
@@ -42,4 +44,15 @@ export async function deleteUserController(req : Request , res : Response , next
     const response = await deleteUserService(id);
 
     createSuccessResponse(res,response,'user delete successfully');
+}
+
+export async function updateUserController(req : Request , res : Response , next : NextFunction){
+
+    const id : number = Number(req.params.id);
+
+    const data = req.body;
+
+    const response = await updateUserService(id,data);
+    
+    createSuccessResponse(res,response,'user updated successfully');
 }

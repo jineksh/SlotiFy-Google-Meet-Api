@@ -1,7 +1,7 @@
 
 import { prisma } from "../config/database.js";
 import {
-    userType
+    userType, updateUserType
 } from '../dtos/users.dto.js'
 
 
@@ -56,5 +56,19 @@ export async function deleteUser(id : number){
     });
 
     return response;
+
+
+}
+
+
+export async function updateUser(id : number , data : updateUserType){
+
+    const updatedUser = await prisma.user.update({
+        where : {id},
+        data
+    })
+
+    return updatedUser;
+
 
 }
