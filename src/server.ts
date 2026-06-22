@@ -3,6 +3,7 @@ import {PORT} from './config/envFile.js';
 import { connectToDatabase } from './config/database.js';
 import { errorMiddleware } from './middleware/errorMiddleware.js';
 import { routeNotFound } from './middleware/route-not-found.js';
+import {router } from './route/index.js'
 
 const app : Express = express();
 
@@ -19,10 +20,11 @@ app.get('/ping',(_req : Request, res : Response) => {
     })
 });
 
-
+// if any req come which start from /api
+app.use('/api',router);
 
 // if any undefine route heat to the server
-app.use(routeNotFound);
+//app.use(routeNotFound);
 
 
 // middleware for the error
