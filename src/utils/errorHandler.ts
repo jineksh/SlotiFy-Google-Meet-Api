@@ -17,5 +17,6 @@ export class ApiError extends Error {
 export const badRequest = (message : string,details?:unknown) => new ApiError(message,400,details);
 export const notFound = (message: string, details?: unknown) => new ApiError(message, 400,details);
 export const serverError = (message = 'Internal Server Error',details? : unknown) => new ApiError(message,500,details);
+export const conflict = (message: string, details?: unknown) => new ApiError(message, 409,details);
 
 
