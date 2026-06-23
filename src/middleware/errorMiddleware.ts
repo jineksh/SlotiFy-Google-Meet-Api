@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { ApiError } from '../utils/errorHandler.js'
 
-export function errorMiddleware(err: Error, _req: Request, res: Response, next: NextFunction) {
+export function errorMiddleware(err: Error, _req: Request, res: Response, _next: NextFunction) {
 
 
     type errorResponse = string | number | boolean | unknown;
