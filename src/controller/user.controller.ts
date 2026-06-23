@@ -6,7 +6,7 @@ import {createSuccessResponse}  from "../utils/successResponse.js";
 import { Request,Response,NextFunction } from "express";
 
 
-export async function createUserController(req : Request , res : Response , next : NextFunction){
+export async function createUserController(req : Request , res : Response , _next : NextFunction){
 
 
     const user = await createUserService(req.body);
@@ -16,7 +16,7 @@ export async function createUserController(req : Request , res : Response , next
 }
 
 
-export async function getUserByIdController(req : Request , res : Response , next : NextFunction){
+export async function getUserByIdController(req : Request , res : Response , _next : NextFunction){
 
     const userId = req.params.id;
 
@@ -28,7 +28,7 @@ export async function getUserByIdController(req : Request , res : Response , nex
 }
 
 
-export async function getUserByEmailController(req : Request , res : Response , next : NextFunction){
+export async function getUserByEmailController(req : Request , res : Response , _next : NextFunction){
 
     const email : string = req.body.email;
 
@@ -38,7 +38,7 @@ export async function getUserByEmailController(req : Request , res : Response , 
 
 }
 
-export async function deleteUserController(req : Request , res : Response , next : NextFunction){
+export async function deleteUserController(req : Request , res : Response , _next : NextFunction){
     const id : number = Number(req.params.id)
 
     const response = await deleteUserService(id);
@@ -46,7 +46,7 @@ export async function deleteUserController(req : Request , res : Response , next
     createSuccessResponse(res,response,'user delete successfully');
 }
 
-export async function updateUserController(req : Request , res : Response , next : NextFunction){
+export async function updateUserController(req : Request , res : Response , _next : NextFunction){
 
     const id : number = Number(req.params.id);
 
