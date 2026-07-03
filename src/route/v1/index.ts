@@ -1,9 +1,10 @@
 import { userRouter } from "./user.route.js";
 import eventTypeRouter from "./eventType.route.js";
+import availabilityRouter from "./availability.route.js";
 import { Router } from "express";
 
-export const v1Router : Router = Router();
+export const v1Router: Router = Router();
 
-
-v1Router.use('/users',userRouter);
-v1Router.use('/event-type',eventTypeRouter);
+v1Router.use('/users', userRouter);
+v1Router.use('/event-types', eventTypeRouter);
+v1Router.use('/', availabilityRouter);

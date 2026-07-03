@@ -34,3 +34,19 @@ export async function deleteEventType(id: number) {
     });
     return eventType;
 }
+
+
+// find by host ID event
+
+export async function getByHostId(hostId : number){
+    const eventType = await prisma.eventType.findMany({
+        where : {
+            hostId
+        },
+        orderBy : {
+            createdAt : 'desc'
+        }
+    });
+
+    return eventType;
+}

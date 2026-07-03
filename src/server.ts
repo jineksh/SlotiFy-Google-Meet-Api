@@ -2,7 +2,6 @@ import express , {Express,Request,Response} from 'express';
 import {PORT} from './config/envFile.js';
 import { connectToDatabase } from './config/database.js';
 import { errorMiddleware } from './middleware/errorMiddleware.js';
-import { routeNotFound } from './middleware/route-not-found.js';
 import {router } from './route/index.js'
 
 const app : Express = express();
