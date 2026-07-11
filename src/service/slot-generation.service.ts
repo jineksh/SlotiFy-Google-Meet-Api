@@ -8,6 +8,7 @@ import { notFound } from "../utils/errorHandler.js";
 import { applyExceptionForDate, overlapsBooked, TimeWindow } from "./slot.service.js";
 import { windowsforWeekday } from './slot.service.js'
 import { generateSlots } from './slot.service.js'
+import { prisma } from "../config/database.js";
 export interface generateSlotsInput {
     hostId: number,
     from?: string,
@@ -34,7 +35,7 @@ export async function regenerateSlots(input: generateSlotsInput) {
     // we have to fetch rules,bookedSlots,exceptions,eventTypes for generate slots
 
 
-    
+
     const [rules, exceptions, eventTypes, bookedSlots] = await Promise.all([
         getAvailabilitiesByUserId(input.hostId),
         getAvailabilityExceptionsByDateRange(input.hostId, from.toJSDate(), to.toJSDate()),
@@ -79,10 +80,33 @@ export async function regenerateSlots(input: generateSlotsInput) {
             windows = applyExceptionForDate(windows, exceptionObj, cursor);
 
             const slots = generateSlots(event.bufferBeforeMinutes, event.bufferAfterMinutes, event.duration, windows).
-            filter((slot) => !overlapsBooked(slot, bookedslots, event.bufferBeforeMinutes, event.bufferAfterMinutes));
-            
+                filter((slot) => !overlapsBooked(slot, bookedslots, event.bufferBeforeMinutes, event.bufferAfterMinutes));
 
 
+
+            for (const slot of slots) {
+                const slotStart = slot.start.toJSDate();
+                const slotEnd = slot.end.toJSDate();
+
+                const key = `${event.id}-${slotStart.toISOString()}-${slotEnd.toISOString()}`;
+
+                await prisma.slot.upsert({
+                    where: {
+                        id: key
+                    },
+                    create: {
+                        userId: input.hostId,
+                        eventTypeId: event.id,
+                        startTime: slotStart,
+                        endTime: slotEnd,
+                        status: "AVAILABLE",
+                    },
+                    update: {
+                        status: "AVAILABLE"
+                    }
+                })
+
+            };
 
 
 
