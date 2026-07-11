@@ -15,7 +15,6 @@ export async function connectToDatabase() {
     } catch (error) {
         console.error("[Database] : Failed to connect to the database.", error);
         process.exit(1); // Exit the process with an error code
-    }   
+    }
 }
-
 

@@ -56,8 +56,8 @@ model Availability {
   id        Int      @id @default(autoincrement())
   userId    Int
   weekday   Int
-  startTime DateTime
-  endTime   DateTime
+  startTime String
+  endTime   String
   isActive  Boolean  @default(true)
   timezone  String   @default("UTC")
   createdAt DateTime @default(now())
@@ -74,8 +74,8 @@ model AvailabilityException {
   eventTypeId Int
   userId      Int
   date        DateTime
-  startTime   DateTime
-  endTime     DateTime
+  startTime   String
+  endTime     String
   type        String   @default("unavailable")
   reason      String?
   timezone    String   @default("UTC")
@@ -89,7 +89,7 @@ model AvailabilityException {
 }
 
 model Slot {
-  id          Int      @id @default(autoincrement())
+  id          String      @id @default(cuid())
   userId      Int
   eventTypeId Int
   startTime   DateTime
@@ -102,6 +102,10 @@ model Slot {
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   bookings  Booking[]
 
+  @@unique([eventTypeId, startTime, endTime])
+
+  @@index([userId, startTime, endTime])
+
   @@map("slot")
 }
 
@@ -109,7 +113,7 @@ model Booking {
   id              Int       @id @default(autoincrement())
   hostId          Int
   eventTypeId     Int
-  slotId          Int
+  slotId          String
   inviteeEmail    String
   inviteeNotes    String?
   inviteeName     String

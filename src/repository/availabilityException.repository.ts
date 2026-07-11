@@ -49,3 +49,22 @@ export async function deleteAvailabilityException(id: number) {
     });
     return response;
 }
+
+
+export async function getAvailabilityExceptionsByDateRange(
+    userId: number,
+    startDate: Date,
+    endDate: Date
+) {
+    const availabilityExceptions = await prisma.availabilityException.findMany({
+        where: {
+            userId,
+            date: {
+                gte: startDate,
+                lte: endDate,
+            },
+        },
+        orderBy: { date: "asc" },
+    });
+    return availabilityExceptions;
+}
