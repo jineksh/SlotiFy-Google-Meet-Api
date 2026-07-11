@@ -54,6 +54,8 @@ export async function regenerateSlots(input: generateSlotsInput) {
     for (const event of eventTypes) {
 
 
+        const validKeys = new Set<string>();
+
         for (let cursor = from; cursor <= to; cursor = cursor.plus({ days: 1 })) {
 
 
@@ -90,6 +92,8 @@ export async function regenerateSlots(input: generateSlotsInput) {
 
                 const key = `${event.id}-${slotStart.toISOString()}-${slotEnd.toISOString()}`;
 
+                validKeys.add(key);
+
                 await prisma.slot.upsert({
                     where: {
                         id: key
@@ -111,6 +115,40 @@ export async function regenerateSlots(input: generateSlotsInput) {
 
 
 
+        }
+
+
+        const allSlots = await prisma.slot.findMany({
+            where : {
+                eventTypeId: event.id,
+                startTime: {
+                    gte: from.toJSDate(),
+                    lte: to.toJSDate()
+                },
+                status: {in : ["AVAILABLE","BOOKED"]}
+                
+            }
+        });
+
+
+        for(const slot of allSlots) {
+
+            const slotStart = slot.startTime.toISOString();
+            const slotEnd = slot.endTime.toISOString();
+            const eventId = slot.eventTypeId;
+
+            const key = `${eventId}-${slotStart}-${slotEnd}`;
+
+            if(!validKeys.has(key)) {
+                await prisma.slot.update({
+                    where : {
+                        id : slot.id
+                    },
+                    data : {
+                        status : "UNAVAILABLE"
+                    }
+                })
+            }
         }
 
 
