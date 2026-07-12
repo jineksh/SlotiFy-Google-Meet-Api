@@ -1,6 +1,7 @@
 import {createTemporalClient} from '../config/temporal.js';
 import { generateSlotsInput } from '../service/slot-generation.service.js';
 
+import { TEMPORAL_TASK_QUEUE } from '../config/envFile.js';
 
 export async function startWorkflow(workflowName: string,workflowId : string,taskQueue: string, args : any[]) {
 
@@ -25,7 +26,7 @@ export async function startWorkflow(workflowName: string,workflowId : string,tas
 }
 
 export function regenerateSlotsWorkflow(input : generateSlotsInput) {
-    return startWorkflow('regenerateSlotsWorkflow', `generate-host-slots|${input.hostId}`, 'slot-generation', [input]);
+    return startWorkflow('regenerateSlotsWorkflow', `generate-host-slots|${input.hostId}`, TEMPORAL_TASK_QUEUE, [input]);
 }
 
 
