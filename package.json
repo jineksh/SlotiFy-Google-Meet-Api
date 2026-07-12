@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon --watch src --ext ts --exec tsx src/server.ts",
-    "migrate": "npx prisma migrate dev && npx prisma generate"
+    "migrate": "npx prisma migrate dev && npx prisma generate",
+    "worker": "tsx src/temporal/worker.ts"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +16,9 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
+    "@temporalio/client": "^1.20.2",
+    "@temporalio/worker": "^1.20.2",
+    "@temporalio/workflow": "^1.20.2",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "luxon": "^3.7.2",
