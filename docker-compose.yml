@@ -13,6 +13,50 @@ services:
       - "${DB_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  temporal:
+    image: temporalio/auto-setup:1.25.2
+    container_name: temporal
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DB=postgres12
+      - DB_PORT=${DB_PORT}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PWD=${DB_PASSWORD}
+      - POSTGRES_SEEDS=db
+      - DYNAMIC_CONFIG_FILE_PATH=config/dynamic-config/development-sql.yaml
+    ports:
+      - "7233:7233"   # gRPC endpoint your Node app connects to
+    networks:
+      - app-network
+    volumes:
+      - ./temporal/dynamic-config:/etc/temporal/config/dynamic-config
+      
+  temporal-ui:
+    image: temporalio/ui:2.31.2
+    container_name: temporal-ui
+    depends_on:
+      - temporal
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_CORS_ORIGINS=http://localhost:3000
+    ports:
+      - "8080:8080"   # Temporal Web UI
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   postgres_data:
