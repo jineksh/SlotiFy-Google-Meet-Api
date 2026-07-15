@@ -7,9 +7,18 @@ import {
     deleteEventType as deleteEventTypeRepository
 } from '../repository/eventType.repository.js';
 import { notFound, badRequest } from '../utils/errorHandler.js';
+import {regenerateSlotsWorkflow} from '../temporal/client.js'
 
 export async function createEventTypeService(data: EventTypeInput) {
     const eventType = await createEventTypeRepository(data);
+
+    const workflowInput = {
+        hostId: eventType.hostId,
+    };
+
+
+    await regenerateSlotsWorkflow(workflowInput);
+
     return eventType;
 }
 

@@ -96,7 +96,11 @@ export async function regenerateSlots(input: generateSlotsInput) {
 
                 await prisma.slot.upsert({
                     where: {
-                        id: key
+                        eventTypeId_startTime_endTime: {
+                            eventTypeId: event.id,
+                            startTime: slotStart,
+                            endTime: slotEnd,
+                        },
                     },
                     create: {
                         userId: input.hostId,
@@ -108,6 +112,7 @@ export async function regenerateSlots(input: generateSlotsInput) {
                     update: {
                         status: "AVAILABLE"
                     }
+
                 })
 
             };
@@ -119,19 +124,19 @@ export async function regenerateSlots(input: generateSlotsInput) {
 
 
         const allSlots = await prisma.slot.findMany({
-            where : {
+            where: {
                 eventTypeId: event.id,
                 startTime: {
                     gte: from.toJSDate(),
                     lte: to.toJSDate()
                 },
-                status: {in : ["AVAILABLE","BOOKED"]}
-                
+                status: { in: ["AVAILABLE", "BOOKED"] }
+
             }
         });
 
 
-        for(const slot of allSlots) {
+        for (const slot of allSlots) {
 
             const slotStart = slot.startTime.toISOString();
             const slotEnd = slot.endTime.toISOString();
@@ -139,13 +144,13 @@ export async function regenerateSlots(input: generateSlotsInput) {
 
             const key = `${eventId}-${slotStart}-${slotEnd}`;
 
-            if(!validKeys.has(key)) {
+            if (!validKeys.has(key)) {
                 await prisma.slot.update({
-                    where : {
-                        id : slot.id
+                    where: {
+                        id: slot.id
                     },
-                    data : {
-                        status : "UNAVAILABLE"
+                    data: {
+                        status: "UNAVAILABLE"
                     }
                 })
             }

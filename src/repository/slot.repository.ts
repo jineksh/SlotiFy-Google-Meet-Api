@@ -1,10 +1,10 @@
 import { prisma } from "../config/database.js";
 
 
-export async function getSlotsByHostIdInRange(hostId: number, startDate: Date, endDate: Date) {
+export async function getSlotsByHostIdInRange(userId: number, startDate: Date, endDate: Date) {
     const slots = await prisma.slot.findMany({
         where: {
-            hostId,
+            userId : userId,
             startTime: {
                 gte: startDate,
                 lte: endDate,
