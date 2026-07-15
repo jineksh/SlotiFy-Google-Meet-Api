@@ -7,8 +7,18 @@ export const createBookingSchema = z.object({
     inviteeNotes: z.string().optional(),
 });
 
+export const listHostBookingsQuerySchema = z.object({
+    status: z.string().optional(),
+    from: z.coerce.date().optional(),
+    to: z.coerce.date().optional(),
+}).refine((data) => !data.from || !data.to || data.from <= data.to, {
+    message: "from must be before or equal to to",
+    path: ["to"],
+});
+
 export const bookingSchema = createBookingSchema;
 export const updateBookingSchema = createBookingSchema.partial();
 
 export type BookingInput = z.infer<typeof bookingSchema>;
 export type BookingUpdateInput = z.infer<typeof updateBookingSchema>;
+export type ListHostBookingsQueryInput = z.infer<typeof listHostBookingsQuerySchema>;

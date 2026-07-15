@@ -1,6 +1,38 @@
 import { prisma } from "../config/database.js";
-import { BookingInput } from "../dtos/booking.dto.js";
+import { BookingInput, ListHostBookingsQueryInput } from "../dtos/booking.dto.js";
 import { badRequest } from "../utils/errorHandler.js";
+
+export async function getHostBookings(hostId: number, filters: ListHostBookingsQueryInput = {}) {
+    const where: any = {
+        hostId,
+    };
+
+    if (filters.status) {
+        where.status = filters.status;
+    }
+
+    if (filters.from || filters.to) {
+        where.createdAt = {};
+
+        if (filters.from) {
+            where.createdAt.gte = filters.from;
+        }
+
+        if (filters.to) {
+            where.createdAt.lte = filters.to;
+        }
+    }
+
+    return prisma.booking.findMany({
+        where,
+        include: {
+            slot: true,
+        },
+        orderBy: {
+            createdAt: "desc",
+        },
+    });
+}
 
 export async function createBookingWithSlotReservation(input: BookingInput) {
     return prisma.$transaction(async (tx: any) => {
