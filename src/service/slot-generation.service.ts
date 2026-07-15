@@ -3,12 +3,16 @@ import { getUserById } from '../repository/user.repository.js';
 import { getAvailabilitiesByUserId } from '../repository/availability.repository.js';
 import { getAvailabilityExceptionsByDateRange } from '../repository/availabilityException.repository.js'
 import { getAllEventTypesByHost } from '../repository/eventType.repository.js'
-import { getSlotsByHostIdInRange } from '../repository/slot.repository.js'
+import {
+    getSlotsByHostIdInRange,
+    getSlotsByEventTypeInRange,
+    updateSlotStatus,
+    upsertSlotForGeneration,
+} from '../repository/slot.repository.js'
 import { notFound } from "../utils/errorHandler.js";
 import { applyExceptionForDate, overlapsBooked, TimeWindow } from "./slot.service.js";
 import { windowsforWeekday } from './slot.service.js'
 import { generateSlots } from './slot.service.js'
-import { prisma } from "../config/database.js";
 export interface generateSlotsInput {
     hostId: number,
     from?: string,
@@ -94,26 +98,13 @@ export async function regenerateSlots(input: generateSlotsInput) {
 
                 validKeys.add(key);
 
-                await prisma.slot.upsert({
-                    where: {
-                        eventTypeId_startTime_endTime: {
-                            eventTypeId: event.id,
-                            startTime: slotStart,
-                            endTime: slotEnd,
-                        },
-                    },
-                    create: {
-                        userId: input.hostId,
-                        eventTypeId: event.id,
-                        startTime: slotStart,
-                        endTime: slotEnd,
-                        status: "AVAILABLE",
-                    },
-                    update: {
-                        status: "AVAILABLE"
-                    }
-
-                })
+                await upsertSlotForGeneration({
+                    userId: input.hostId,
+                    eventTypeId: event.id,
+                    startTime: slotStart,
+                    endTime: slotEnd,
+                    status: "AVAILABLE",
+                });
 
             };
 
@@ -123,17 +114,7 @@ export async function regenerateSlots(input: generateSlotsInput) {
         }
 
 
-        const allSlots = await prisma.slot.findMany({
-            where: {
-                eventTypeId: event.id,
-                startTime: {
-                    gte: from.toJSDate(),
-                    lte: to.toJSDate()
-                },
-                status: { in: ["AVAILABLE", "BOOKED"] }
-
-            }
-        });
+        const allSlots = await getSlotsByEventTypeInRange(event.id, from.toJSDate(), to.toJSDate());
 
 
         for (const slot of allSlots) {
@@ -145,14 +126,7 @@ export async function regenerateSlots(input: generateSlotsInput) {
             const key = `${eventId}-${slotStart}-${slotEnd}`;
 
             if (!validKeys.has(key)) {
-                await prisma.slot.update({
-                    where: {
-                        id: slot.id
-                    },
-                    data: {
-                        status: "UNAVAILABLE"
-                    }
-                })
+                await updateSlotStatus(slot.id, "UNAVAILABLE");
             }
         }
 
