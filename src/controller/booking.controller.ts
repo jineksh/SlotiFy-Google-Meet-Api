@@ -10,7 +10,7 @@ export async function createBookingController(req: any, res: any) {
 
     const input = req.body;
     const booking = await createBookingOptimasticService(input);
-    res.status(201).json(booking);
+    return createSuccessResponse(res,booking,"Slot booked successfully");
 
 }
 

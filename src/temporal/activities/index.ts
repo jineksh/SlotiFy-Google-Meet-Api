@@ -4,3 +4,5 @@ import {regenerateSlots, generateSlotsInput} from '../../service/slot-generation
 export async function regenerateSlotsActivity(input: generateSlotsInput) {
     await regenerateSlots(input);
 }
+
+
