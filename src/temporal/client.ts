@@ -1,5 +1,6 @@
 import {createTemporalClient} from '../config/temporal.js';
 import { generateSlotsInput } from '../service/slot-generation.service.js';
+import {mailType} from '../utils/sendMail.js'
 
 import { TEMPORAL_TASK_QUEUE } from '../config/envFile.js';
 
@@ -29,4 +30,8 @@ export function regenerateSlotsWorkflow(input : generateSlotsInput) {
     return startWorkflow('regenerateSlotsWorkflow', `generate-host-slots|${input.hostId}`, TEMPORAL_TASK_QUEUE, [input]);
 }
 
+
+export function sendMailWorkflow(input : mailType){
+    return startWorkflow('sendMailWorkFlow',`sendMail|${input.inviteeEmail}|${input.time}`,TEMPORAL_TASK_QUEUE,[input]);
+}
 

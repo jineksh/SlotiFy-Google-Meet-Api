@@ -2,9 +2,9 @@
 import { NativeConnection, Worker } from "@temporalio/worker";
 import * as activities from './activities/index.js';
 import { TEMPORAL_TASK_QUEUE,TEMPORAL_ADDRESS,TEMPORAL_NAMESPACE } from '../config/envFile.js';
-import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
 
-
+const require = createRequire(import.meta.url);
 
 async function run() {
 
@@ -15,7 +15,7 @@ async function run() {
     const worker = await Worker.create({
         connection,
         namespace: TEMPORAL_NAMESPACE,
-        workflowsPath: fileURLToPath(new URL('./workflows/index.ts', import.meta.url)),
+        workflowsPath: require.resolve('./workflows/index'),
         activities,
         taskQueue: TEMPORAL_TASK_QUEUE,
     });

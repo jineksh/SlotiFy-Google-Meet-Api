@@ -1,8 +1,23 @@
-import { BookingInput, ListHostBookingsQueryInput } from "../dtos/booking.dto.js";
+import { BookingInput, createBookingSchema, ListHostBookingsQueryInput } from "../dtos/booking.dto.js";
 import { createBookingWithSlotReservation, getHostBookings } from "../repository/booking.repository.js";
+import {mailType} from '../utils/sendMail.js'
+import {sendMailWorkflow} from '../temporal/client.js'
+import {regenerateSlotsWorkflow} from '../temporal/client.js'
 
 export async function createBookingOptimastic(input: BookingInput) {
     const booking = await createBookingWithSlotReservation(input);
+
+    const mailObj : mailType = {
+        inviteeEmail : booking.inviteeEmail,
+        inviteeName : booking.inviteeName,
+        date : booking.slot.startTime,
+        time : booking.slot.startTime
+    }
+
+    await sendMailWorkflow(mailObj);
+    await regenerateSlotsWorkflow({hostId : booking.slot.userId})
+
+
 
     return {
         id: booking.id,
