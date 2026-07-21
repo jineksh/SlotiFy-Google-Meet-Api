@@ -15,3 +15,6 @@ export const TEMPORAL_TASK_QUEUE : string = process.env.TEMPORAL_TASK_QUEUE ? pr
 export const GMAIL_USER  = process.env.GMAIL_USER;
 
 export const GMAIL_PASS = process.env.GMAIL_PASS;
+
+
+export const GOOGLE_CALENDARID = process.env.GOOGLE_CALENDARID;
