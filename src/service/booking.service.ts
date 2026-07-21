@@ -1,23 +1,48 @@
 import { BookingInput, createBookingSchema, ListHostBookingsQueryInput } from "../dtos/booking.dto.js";
 import { createBookingWithSlotReservation, getHostBookings } from "../repository/booking.repository.js";
-import {mailType} from '../utils/sendMail.js'
-import {sendMailWorkflow} from '../temporal/client.js'
-import {regenerateSlotsWorkflow} from '../temporal/client.js'
+import { mailType } from '../utils/sendMail.js'
+import { sendMailWorkflow } from '../temporal/client.js'
+import { regenerateSlotsWorkflow } from '../temporal/client.js'
+import { CreateEventParams, createCalendarEvent } from './calendar-invite.js'
+import { prisma } from '../config/database.js'
 
 export async function createBookingOptimastic(input: BookingInput) {
     const booking = await createBookingWithSlotReservation(input);
 
-    const mailObj : mailType = {
-        inviteeEmail : booking.inviteeEmail,
-        inviteeName : booking.inviteeName,
-        date : booking.slot.startTime,
-        time : booking.slot.startTime
+    const mailObj: mailType = {
+        inviteeEmail: booking.inviteeEmail,
+        inviteeName: booking.inviteeName,
+        date: booking.slot.startTime,
+        time: booking.slot.startTime
     }
 
-    await sendMailWorkflow(mailObj);
-    await regenerateSlotsWorkflow({hostId : booking.slot.userId})
+    await Promise.all([
+        sendMailWorkflow(mailObj),
+        regenerateSlotsWorkflow({hostId : booking.slot.userId})
+    ])
+
+    const calendarInviteInput: CreateEventParams = {
+        title: booking.eventType.title,
+        description: booking.eventType.description,
+        timeZone: 'Asia/Kolkata',
+        startTime: booking.slot.startTime.toISOString(),
+        endTime: booking.slot.endTime.toISOString(),
+        hostEmail: booking.user.email,
+        inviteeEmail: booking.inviteeEmail
+    }
+
+    const { eventId, meetLink } = await createCalendarEvent(calendarInviteInput);
 
 
+    const updatedBooking = await prisma.booking.update({
+        where: {
+            id: booking.id,
+        },
+        data: {
+            calendarEventId: eventId,
+            meetLink: meetLink,
+        },
+    });
 
     return {
         id: booking.id,
@@ -26,8 +51,8 @@ export async function createBookingOptimastic(input: BookingInput) {
         inviteeEmail: booking.inviteeEmail,
         inviteeNotes: booking.inviteeNotes,
         inviteeName: booking.inviteeName,
-        meetLink: booking.meetLink,
-        calendarEventId: booking.calendarEventId,
+        meetLink: updatedBooking.meetLink,
+        calendarEventId: updatedBooking.calendarEventId,
         slot: {
             id: booking.slot.id,
             startTime: booking.slot.startTime,

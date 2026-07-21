@@ -9,6 +9,7 @@ export interface CreateEventParams {
     endTime: string;
     hostEmail: string;
     inviteeEmail: string;
+    timeZone : string
 }
 
 
@@ -17,18 +18,18 @@ export const createCalendarEvent = async (
     params: CreateEventParams
 ) => {
     try {
-        const { title, description, startTime, endTime, hostEmail, inviteeEmail } = params;
+        const { title, description, startTime, endTime, hostEmail, inviteeEmail ,timeZone} = params;
 
         const eventPayload = {
             title,
             description,
             start: {
                 dateTime: startTime,
-                timeZone: 'Asia/Kolkata',
+                timeZone: timeZone,
             },
             end: {
                 dateTime: endTime,
-                timeZone: 'Asia/Kolkata',
+                timeZone: timeZone,
             },
             attendees: [
                 { email: hostEmail },

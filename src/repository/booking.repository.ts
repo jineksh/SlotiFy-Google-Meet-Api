@@ -72,6 +72,8 @@ export async function createBookingWithSlotReservation(input: BookingInput) {
             },
             include: {
                 slot: true,
+                user : true,
+                eventType : true
             },
         });
 
