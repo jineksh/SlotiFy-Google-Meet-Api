@@ -86,7 +86,7 @@ export async function regenerateSlots(input: generateSlotsInput) {
             windows = applyExceptionForDate(windows, exceptionObj, cursor);
 
             const slots = generateSlots(event.bufferBeforeMinutes, event.bufferAfterMinutes, event.duration, windows).
-                filter((slot) => !overlapsBooked(slot, bookedslots, event.bufferBeforeMinutes, event.bufferAfterMinutes));
+                filter((slot) => slot.start > DateTime.utc() &&!overlapsBooked(slot, bookedslots, event.bufferBeforeMinutes, event.bufferAfterMinutes));
 
 
 
@@ -94,7 +94,7 @@ export async function regenerateSlots(input: generateSlotsInput) {
                 const slotStart = slot.start.toJSDate();
                 const slotEnd = slot.end.toJSDate();
 
-                const key = `${event.id}-${slotStart.toISOString()}-${slotEnd.toISOString()}`;
+                const key = `${event.id}-${slot.start.toMillis()}-${slot.end.toMillis()}`;;
 
                 validKeys.add(key);
 
@@ -119,11 +119,9 @@ export async function regenerateSlots(input: generateSlotsInput) {
 
         for (const slot of allSlots) {
 
-            const slotStart = slot.startTime.toISOString();
-            const slotEnd = slot.endTime.toISOString();
-            const eventId = slot.eventTypeId;
+            if (slot.status === 'BOOKED') continue;
 
-            const key = `${eventId}-${slotStart}-${slotEnd}`;
+            const key = `${slot.eventTypeId}-${slot.startTime.getTime()}-${slot.endTime.getTime()}`;
 
             if (!validKeys.has(key)) {
                 await updateSlotStatus(slot.id, "UNAVAILABLE");

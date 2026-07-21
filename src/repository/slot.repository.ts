@@ -8,7 +8,7 @@ export async function getSlotsByHostIdInRange(userId: number, startDate: Date, e
                 gte: startDate,
                 lte: endDate,
             },
-            status: 'BOOKED', // Only fetch booked slots
+            status: 'BOOKED', 
         },
     });
 

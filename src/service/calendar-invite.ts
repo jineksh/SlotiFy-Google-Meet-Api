@@ -1,6 +1,6 @@
 import { calendar } from '../config/google-calendar.js'
 
-import { GOOGLE_CALENDARID } from '../config/envFile.js'
+import { GMAIL_USER } from '../config/envFile.js'
 
 export interface CreateEventParams {
     title: string;
@@ -21,7 +21,7 @@ export const createCalendarEvent = async (
         const { title, description, startTime, endTime, hostEmail, inviteeEmail ,timeZone} = params;
 
         const eventPayload = {
-            title,
+            summary: 'EVENT',
             description,
             start: {
                 dateTime: startTime,
@@ -44,10 +44,10 @@ export const createCalendarEvent = async (
         };
 
         const response = await calendar.events.insert({
-            calendarId: GOOGLE_CALENDARID,
+            calendarId: GMAIL_USER,
             requestBody: eventPayload,
             conferenceDataVersion: 1,
-            sendUpdates: 'all',
+            sendUpdates: 'none',
         });
 
         // Null checks for Type Safety

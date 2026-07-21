@@ -3,8 +3,8 @@ import { createBookingWithSlotReservation, getHostBookings } from "../repository
 import { mailType } from '../utils/sendMail.js'
 import { sendMailWorkflow } from '../temporal/client.js'
 import { regenerateSlotsWorkflow } from '../temporal/client.js'
-import { CreateEventParams, createCalendarEvent } from './calendar-invite.js'
-import { prisma } from '../config/database.js'
+//import { CreateEventParams, createCalendarEvent } from './calendar-invite.js'
+//import { prisma } from '../config/database.js'
 
 export async function createBookingOptimastic(input: BookingInput) {
     const booking = await createBookingWithSlotReservation(input);
@@ -16,33 +16,33 @@ export async function createBookingOptimastic(input: BookingInput) {
         time: booking.slot.startTime
     }
 
-    await Promise.all([
-        sendMailWorkflow(mailObj),
-        regenerateSlotsWorkflow({hostId : booking.slot.userId})
-    ])
 
-    const calendarInviteInput: CreateEventParams = {
-        title: booking.eventType.title,
-        description: booking.eventType.description,
-        timeZone: 'Asia/Kolkata',
-        startTime: booking.slot.startTime.toISOString(),
-        endTime: booking.slot.endTime.toISOString(),
-        hostEmail: booking.user.email,
-        inviteeEmail: booking.inviteeEmail
-    }
-
-    const { eventId, meetLink } = await createCalendarEvent(calendarInviteInput);
+    await sendMailWorkflow(mailObj),
+        await regenerateSlotsWorkflow({ hostId: booking.slot.userId })
 
 
-    const updatedBooking = await prisma.booking.update({
-        where: {
-            id: booking.id,
-        },
-        data: {
-            calendarEventId: eventId,
-            meetLink: meetLink,
-        },
-    });
+    // const calendarInviteInput: CreateEventParams = {
+    //     title: booking.eventType.title,
+    //     description: booking.eventType.description,
+    //     timeZone: 'Asia/Kolkata',
+    //     startTime: booking.slot.startTime.toISOString(),
+    //     endTime: booking.slot.endTime.toISOString(),
+    //     hostEmail: booking.host.email,
+    //     inviteeEmail: booking.inviteeEmail
+    // }
+
+    //const { eventId, meetLink } = await createCalendarEvent(calendarInviteInput);
+
+
+    // const updatedBooking = await prisma.booking.update({
+    //     where: {
+    //         id: booking.id,
+    //     },
+    //     data: {
+    //         calendarEventId: eventId,
+    //         meetLink: meetLink,
+    //     },
+    // });
 
     return {
         id: booking.id,
@@ -51,8 +51,8 @@ export async function createBookingOptimastic(input: BookingInput) {
         inviteeEmail: booking.inviteeEmail,
         inviteeNotes: booking.inviteeNotes,
         inviteeName: booking.inviteeName,
-        meetLink: updatedBooking.meetLink,
-        calendarEventId: updatedBooking.calendarEventId,
+        meetLink: booking.meetLink,
+        calendarEventId: booking.calendarEventId,
         slot: {
             id: booking.slot.id,
             startTime: booking.slot.startTime,
